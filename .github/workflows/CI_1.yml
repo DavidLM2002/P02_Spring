@@ -1,0 +1,46 @@
+# Nombre que aparecerá en la pestaña "Actions" de GitHub
+name: El Vigilante Universal
+
+# --- CONFIGURACIÓN DEL DISPARADOR (TRIGGER) ---
+# Aquí definimos CUÁNDO se ejecuta este workflow.
+# Al poner solo "push" sin especificar ramas (branches),
+# GitHub entiende que debe ejecutarse en TODAS las ramas por defecto.
+on: push
+
+# --- DEFINICIÓN DE TRABAJOS (JOBS) ---
+jobs:
+  vigilancia: # Nombre interno del trabajo
+    # Definimos la máquina virtual donde correrá todo.
+    # 'ubuntu-latest' nos da un Linux limpio y actualizado.
+    runs-on: ubuntu-latest
+
+    # --- PASOS A EJECUTAR (STEPS) ---
+    steps:
+      # PASO 1: Descargar tu código
+      # La máquina virtual está vacía. Esta acción oficial "checkout"
+      # clona tu repositorio dentro de la máquina para que pueda verlo.
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      # PASO 2: Instalar Java
+      # Configuramos el entorno para que pueda compilar Java.
+      # Usamos la versión 21 (como en tu ejemplo anterior).
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'      # Versión del JDK
+          distribution: 'temurin' # Distribución estándar y fiable
+          cache: 'maven'          # Guarda las librerías descargadas para ir más rápido la próxima vez
+
+      # PASO 3: Permisos de ejecución
+      # En Linux, los scripts (como mvnw) necesitan permiso explícito para ejecutarse.
+      # 'chmod +x' significa "Change Mode + eXecutable".
+      - name: Dar permisos de ejecución al wrapper de Maven
+        run: chmod +x mvnw
+
+      # PASO 4: La prueba (Compilación)
+      # Ejecutamos Maven solo con 'compile'.
+      # Esto descarga las librerías y revisa que el código no tenga errores de sintaxis.
+      # No ejecutamos tests ni generamos el .jar (es más rápido así).
+      - name: Verificar que el proyecto compila correctamente
+        run: ./mvnw compile
