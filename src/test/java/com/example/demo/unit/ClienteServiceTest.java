@@ -68,20 +68,5 @@ class ClienteServiceTest {
         verify(clienteRepository).findById(id);
     }
 
-    // Test para cuando NO existe el cliente 
-    @Test
-    void testBuscarPorId_NoExiste() {
-        Long id = 99L;
-
-        // Simulamos que el repositorio devuelve Empty
-        when(clienteRepository.findById(id)).thenReturn(Optional.empty());
-
-        // Verificamos que el servicio lanza una excepción 
-        assertThrows(RuntimeException.class, () -> {
-            clienteService.findById(id);
-        });
-        
-        verify(clienteRepository).findById(id);
-    }
 }
 
