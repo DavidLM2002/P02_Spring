@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title layout:fragment="head">Listado de reviews</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Listado de reviews</h2>
+        <a class="btn btn-primary" th:href="@{/reviews/nuevo}">Nueva review</a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>Id</th>
+            <th>Cliente</th>
+            <th>Descripción</th>
+            <th>Valoración</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${reviews}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.cliente != null ? r.cliente.nombre : 'Sin cliente'}">Cliente</td>
+            <td th:text="${r.descripcion}">Descripción</td>
+            <td>
+                <span th:text="${r.valoracion}">5</span>
+                <span>⭐</span>
+            </td>
+            <td>
+                <a class="btn btn-sm btn-warning"
+                   th:href="@{'/reviews/editar/' + ${r.id}}">Editar</a>
+                <a class="btn btn-sm btn-danger"
+                   th:href="@{'/reviews/eliminar/' + ${r.id}}"
+                   onclick="return confirm('¿Seguro que quieres eliminar esta review?');">
+                    Eliminar
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(reviews)}">
+            <td colspan="5" class="text-center">No hay reviews registradas.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

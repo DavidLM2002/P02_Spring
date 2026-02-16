@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title layout:fragment="head">Informes</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <h2 class="mb-4">Informe de KPI</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h5>Clientes por género</h5>
+            <canvas id="generoChart"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Reviews por nº de estrellas</h5>
+            <canvas id="valoracionChart"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Clientes por franja de edad</h5>
+            <canvas id="edadChart"></canvas>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Clientes con intolerancia vs sin intolerancia</h5>
+            <canvas id="intoleranciaChart"></canvas>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /* <![CDATA[ */
+
+        // JSON REAL desde el controller
+        let clientes = JSON.parse(/*[[${clientesJson}]]*/ "[]");
+        let reviews = JSON.parse(/*[[${reviewsJson}]]*/ "[]");
+
+        console.log("Clientes:", clientes);
+        console.log("Reviews:", reviews);
+
+        // --- Clientes por género ---
+        let hombres = clientes.filter(c => c.genero.trim() === 'Hombre').length;
+        let mujeres = clientes.filter(c => c.genero.trim() === 'Mujer').length;
+        let otros = clientes.filter(c => c.genero.trim() === 'Otro').length;
+
+        new Chart(document.getElementById('generoChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Hombre', 'Mujer', 'Otro'],
+                datasets: [{
+                    data: [hombres, mujeres, otros],
+                    backgroundColor: ['#0d6efd', '#e83e8c', '#6c757d']
+                }]
+            }
+        });
+
+        // --- Reviews por nº de estrellas ---
+        let estrellas = [1, 2, 3, 4, 5];
+        let conteoEstrellas = estrellas.map(v =>
+            reviews.filter(r => Number(r.valoracion) === v).length
+        );
+
+        new Chart(document.getElementById('valoracionChart'), {
+            type: 'bar',
+            data: {
+                labels: estrellas.map(e => e + ' ⭐'),
+                datasets: [{
+                    label: 'Nº de reviews',
+                    data: conteoEstrellas,
+                    backgroundColor: '#198754'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // --- Clientes por franja de edad ---
+        function enRango(edad, min, max) {
+            edad = Number(edad);
+            return edad >= min && (max === null || edad < max);
+        }
+
+        let rangoLabels = ['0-15', '15-24', '25-35', '35-50', '50+'];
+        let rangoValores = [
+            clientes.filter(c => enRango(c.edad, 0, 15)).length,
+            clientes.filter(c => enRango(c.edad, 15, 24)).length,
+            clientes.filter(c => enRango(c.edad, 25, 35)).length,
+            clientes.filter(c => enRango(c.edad, 35, 50)).length,
+            clientes.filter(c => enRango(c.edad, 50, null)).length
+        ];
+
+        new Chart(document.getElementById('edadChart'), {
+            type: 'bar',
+            data: {
+                labels: rangoLabels,
+                datasets: [{
+                    label: 'Nº de clientes',
+                    data: rangoValores,
+                    backgroundColor: '#fd7e14'
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // --- Intolerancia ---
+        let conIntolerancia = clientes.filter(c => Number(c.intolerancia) === 1).length;
+        let sinIntolerancia = clientes.filter(c => Number(c.intolerancia) === 0).length;
+
+        new Chart(document.getElementById('intoleranciaChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Con intolerancia', 'Sin intolerancia'],
+                datasets: [{
+                    data: [conIntolerancia, sinIntolerancia],
+                    backgroundColor: ['#dc3545', '#20c997']
+                }]
+            }
+        });
+
+        /* ]]> */
+    </script>
+</main>
+</body>
+</html>
+
+
+

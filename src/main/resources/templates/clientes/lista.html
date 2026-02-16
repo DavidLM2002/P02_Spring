@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title layout:fragment="head">Listado de clientes</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Listado de clientes</h2>
+        <a class="btn btn-primary" th:href="@{/clientes/nuevo}">Nuevo cliente</a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Género</th>
+            <th>Intolerancia</th>
+            <th>Detalle</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="c : ${clientes}">
+            <td th:text="${c.id}">1</td>
+            <td th:text="${c.nombre}">Nombre</td>
+            <td th:text="${c.edad}">20</td>
+            <td th:text="${c.genero}">M</td>
+            <td>
+                <span th:text="${c.intolerancia} ? 'Sí' : 'No'">No</span>
+            </td>
+            <td th:text="${c.detalleIntolerancia}">Gluten</td>
+            <td>
+                <a class="btn btn-sm btn-warning"
+                   th:href="@{'/clientes/editar/' + ${c.id}}">Editar</a>
+                <a class="btn btn-sm btn-danger"
+                   th:href="@{'/clientes/eliminar/' + ${c.id}}"
+                   onclick="return confirm('¿Seguro que quieres eliminar este cliente?');">
+                    Eliminar
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(clientes)}">
+            <td colspan="7" class="text-center">No hay clientes registrados.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

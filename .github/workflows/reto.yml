@@ -1,0 +1,30 @@
+name: Mi Primer Pipeline de Distribucion
+on:
+  push:
+    branches: [ "main" , "dev-david" ] # RETO 1: Añade la rama que corresponda
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+        name: Dar permisos al wrapper de Maven
+        run: chmod +x mvnw
+
+      - name: Construir Proyecto
+        run: ./mvnw package -DskipTests # Generamos el .jar
+
+      # RETO 2: Completar los datos para guardar el archivo
+      - name: Guardar el archivo para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mi-aplicacion-lista
+          path: target/*.jar # ¿Donde guarda Maven el .jar?

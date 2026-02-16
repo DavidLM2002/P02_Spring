@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title layout:fragment="head">Formulario review</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <h2 th:text="${review.id} != null ? 'Editar review' : 'Nueva review'">Review</h2>
+
+    <form th:action="@{/reviews/guardar}" th:object="${review}" method="post">
+
+    <input type="hidden" th:field="*{id}" />
+
+    <div class="mb-3">
+        <label>Descripción</label>
+        <input type="text" class="form-control" th:field="*{descripcion}" />
+    </div>
+
+    <div class="mb-3">
+        <label>Valoración</label>
+        <select class="form-select" th:field="*{valoracion}">
+            <option value="1">1 ⭐</option>
+            <option value="2">2 ⭐</option>
+            <option value="3">3 ⭐</option>
+            <option value="4">4 ⭐</option>
+            <option value="5">5 ⭐</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Cliente</label>
+        <select class="form-select" th:field="*{cliente.id}">
+            <option th:each="c : ${clientes}"
+                    th:value="${c.id}"
+                    th:text="${c.nombre}">
+            </option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+
+</form>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title layout:fragment="head">Formulario cliente</title>
+</head>
+<body>
+<main layout:fragment="content">
+    <h2 th:text="${cliente.id} != null ? 'Editar cliente' : 'Nuevo cliente'">Cliente</h2>
+
+    <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post" class="row g-3">
+
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input type="text" th:field="*{nombre}" class="form-control" required>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Edad</label>
+            <input type="number" th:field="*{edad}" class="form-control" min="0" required>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Género</label>
+            <select th:field="*{genero}" class="form-select">
+                <option value="">Selecciona...</option>
+                <option value="Hombre">Hombre</option>
+                <option value="Mujer">Mujer</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">¿Tiene intolerancia?</label>
+            <select th:field="*{intolerancia}" class="form-select">
+                <option th:value="false">No</option>
+                <option th:value="true">Sí</option>
+            </select>
+        </div>
+
+        <div class="col-md-9">
+            <label class="form-label">Detalle de la intolerancia</label>
+            <input type="text" th:field="*{detalleIntolerancia}" class="form-control"
+                   placeholder="Ej: Gluten, lactosa...">
+        </div>
+
+        <div class="col-12 d-flex justify-content-between">
+            <a class="btn btn-secondary" th:href="@{/clientes}">Volver</a>
+            <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>
