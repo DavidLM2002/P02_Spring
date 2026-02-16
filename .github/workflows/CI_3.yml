@@ -1,0 +1,34 @@
+name: El Estándar Java 21
+
+on: push # Se ejecuta en cualquier push para verificar el entorno siempre
+
+jobs:
+  verificacion-entorno:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # --- AQUÍ ESTÁ LA CLAVE DEL EJERCICIO ---
+      - name: Imponer Java 21 (Distribución Zulu)
+        uses: actions/setup-java@v4
+        with:
+          # 1. Forzamos la versión exacta.
+          java-version: '21' 
+          
+          # 2. Forzamos la distribución "Zulu".
+          # Si pusiéramos 'temurin' u 'oracle', usaría otra implementación.
+          # Al poner 'zulu', GitHub descarga e instala específicamente esta.
+          distribution: 'zulu' 
+          
+          cache: 'maven'
+
+      # --- PASO DE VERIFICACIÓN (OPCIONAL PERO RECOMENDADO) ---
+      # Este paso sirve para que veas en los logs que, efectivamente,
+      # se está usando Zulu y la versión 21.
+      - name: Mostrar versión de Java instalada
+        run: java -version
+
+      - name: Compilar proyecto
+        run: ./mvnw package -DskipTests
