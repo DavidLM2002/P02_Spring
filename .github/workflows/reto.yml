@@ -16,6 +16,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Dar permisos al wrapper de Maven
+        run: chmod +x mvnw
+
       - name: Construir Proyecto
         run: ./mvnw package -DskipTests # Generamos el .jar
 
