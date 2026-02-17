@@ -1,0 +1,41 @@
+name: Supuesto 1 - Despliegue Manual
+
+# --- EL INTERRUPTOR MANUAL ---
+# 'workflow_dispatch' es el evento que habilita el botón en la interfaz.
+# No se ejecutará automáticamente con ningún push ni pull request.
+on: workflow_dispatch
+
+jobs:
+  generar-paquete-manual:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Java 21
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. PERMISOS DE EJECUCIÓN (¡Imprescindible!) 🛡️
+      - name: Dar permisos de ejecución al wrapper
+        run: chmod +x mvnw
+
+      # 4. GENERAR EL PAQUETE
+      # Al ser un despliegue manual, solemos querer el artefacto final rápido.
+      # Usamos -DskipTests para ir directo al grano (opcional, puedes quitarlo si quieres testear antes).
+      - name: Empaquetar aplicación (Manual)
+        run: ./mvnw -B package -DskipTests
+
+      # 5. GUARDAR EL RESULTADO
+      # Subimos el .jar o .war generado para que el profesor pueda descargarlo.
+      - name: Subir artefacto manual
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-despliegue-manual
+          path: target/*.jar
