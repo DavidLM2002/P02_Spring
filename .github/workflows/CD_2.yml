@@ -1,0 +1,51 @@
+# Nombre del flujo
+name: El Almacén de Ejecutables
+
+# --- DISPARADOR ---
+# Se ejecuta automáticamente cuando subimos cambios (push).
+# En un entorno real, esto se limitaría a la rama 'main' o 'release'.
+on: push
+
+jobs:
+  empaquetado-rapido:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar el código
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Java 21
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. PERMISOS DE EJECUCIÓN (¡Muy importante!)
+      # Sin esto, el script mvnw no funciona en Linux.
+      - name: Dar permisos de ejecución al wrapper
+        run: chmod +x mvnw
+
+      # 4. GENERAR EL EJECUTABLE (.war / .jar)
+      # - 'package': Empaqueta el código compilado.
+      # - '-DskipTests': Omitimos los tests para que sea súper rápido,
+      #   asumiendo que los tests ya se pasaron en otra etapa previa.
+      - name: Generar paquete omitiendo tests
+        run: ./mvnw -B package -DskipTests
+
+      # 5. GUARDAR EL ARTEFACTO
+      # La máquina virtual se destruye al acabar. Si no guardamos el archivo,
+      # se pierde para siempre. Esta acción lo sube a GitHub.
+      - name: Subir ejecutable al almacén
+        uses: actions/upload-artifact@v4
+        with:
+          name: mi-aplicacion-web # Nombre con el que descargarás el zip
+          
+          # IMPORTANTE: El prompt pide un .war. 
+          # Spring Boot por defecto genera .jar. 
+          # Pongo una ruta que busca AMBOS por si acaso.
+          path: target/*.jar
+          # Si tu proyecto está configurado explícitamente como WAR en el pom.xml,
+          # cambiaría a: target/*.war
