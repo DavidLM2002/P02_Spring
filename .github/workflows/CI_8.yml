@@ -1,0 +1,40 @@
+name: Escaneo de Vulnerabilidades (SecOps)
+
+on: push
+
+jobs:
+  analisis-seguridad:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+                  # 3. Permisos
+      - name: Dar permisos al wrapper
+        run: chmod +x mvnw
+
+      # --- EL PASO DE SEGURIDAD ---
+      # Ejecutamos el plugin de OWASP directamente desde Maven.
+      # No hace falta modificar el pom.xml del proyecto, lo llamamos desde fuera.
+      # Explicación del comando:
+      # 1. org.owasp:dependency-check-maven:check -> Llama a la herramienta.
+      # 2. -Dformat=HTML -> Queremos el reporte en un archivo web para leerlo.
+      - name: Analizar dependencias en busca de vulnerabilidades
+        run: mvn org.owasp:dependency-check-maven:check -Dformat=HTML
+
+      # --- GUARDAR EL REPORTE ---
+      # El análisis genera un archivo, pero si la máquina virtual se apaga, lo perdemos.
+      # Tenemos que subirlo como "Artifact" para poder descargarlo y leerlo.
+      - name: Subir Reporte de Seguridad
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-owasp-seguridad
+          path: target/dependency-check-report.html
