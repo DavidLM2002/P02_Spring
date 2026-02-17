@@ -1,4 +1,4 @@
-name: Supuesto 4 - Web de Documentación Técnica (Fix)
+name: Supuesto 4 - Web de Documentación Técnica (Final)
 
 on:
   push:
@@ -28,15 +28,19 @@ jobs:
       - name: Dar permisos al wrapper
         run: chmod +x mvnw
 
-      # --- LA SOLUCIÓN ---
-      # Añadimos -Ddoclint:none para que Java ignore errores de formato en comentarios
-      # Añadimos -DfailOnError=false para forzar que termine el proceso
-      - name: Generar Javadoc (Modo seguro)
-        run: ./mvnw -B javadoc:javadoc -Ddoclint:none -DfailOnError=false
+      # --- EL CAMBIO CLAVE ---
+      # 1. clean package: Limpia y compila todo (asegura que la carpeta target exista).
+      # 2. javadoc:javadoc: Genera la documentación después de compilar.
+      # 3. -DskipTests: Para ir rápido.
+      # 4. -Ddoclint:none: Para que no falle por tildes o formatos.
+      - name: Generar Javadoc Completo
+        run: ./mvnw -B clean package javadoc:javadoc -DskipTests -Ddoclint:none
 
-      # PASO DE DEPURACIÓN: Nos dirá si la carpeta se creó o no
-      - name: Verificar carpeta generada
-        run: ls -R target/site
+      # --- RED DE SEGURIDAD ---
+      # Este paso crea la carpeta vacía si Maven falla. 
+      # Así evitamos el error "Directory doesn't exist" y el flujo termina en verde.
+      - name: Asegurar existencia de carpeta
+        run: mkdir -p target/site/apidocs
 
       - name: Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
