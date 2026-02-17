@@ -34,7 +34,7 @@ jobs:
       - name: Construir y Empaquetar
         run: ./mvnw -B package -DskipTests
 
-      # PASO EXTRA (Opcional): Subir el .jar para que el profesor lo pueda descargar
+      # PASO EXTRA (Opcional): Subir el .jar para que el profesor lo pueda descargars
       - name: Subir Artefacto (El .jar generado)
         uses: actions/upload-artifact@v4
         with:
