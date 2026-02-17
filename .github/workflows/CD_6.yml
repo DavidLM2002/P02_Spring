@@ -1,0 +1,50 @@
+name: 'Supuesto nº6: Despliegue Remoto por SSH'
+
+on:
+  push:
+    branches: [ "*" ] # Normalmente solo desplegamos la rama principal
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar código
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: 3. Generar el archivo WAR
+        # Esto compila y empaqueta el proyecto. El archivo quedará en la carpeta 'target/'
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+
+      - name: 4. Copiar WAR al servidor remoto (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          # Origen: Busca cualquier archivo .war dentro de la carpeta target
+          source: "target/*.war"
+          # Destino: La carpeta donde quieras dejarlo en tu servidor
+          target: "/home/${{ secrets.REMOTE_USER }}/despliegues"
+          # 'strip_components: 1' evita que se cree la carpeta 'target/' en el destino
+          strip_components: 1
+
+      - name: 5. Notificador de Éxito
+        if: success()
+        run: |
+          echo "===================================================="
+          echo "🚀 DESPLIEGUE REMOTO COMPLETADO"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo "📦 Archivo enviado a: ${{ secrets.REMOTE_HOST }}"
+          echo "===================================================="
