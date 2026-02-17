@@ -1,4 +1,4 @@
-name: Supuesto 4 - Web (Prueba Definitiva)
+name: Supuesto 4 - Web (Debug)
 
 on:
   push:
@@ -21,16 +21,31 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven' # Añadimos cache para que sea más rápido
+          cache: 'maven'
 
-      - name: 3. Dar permisos al wrapper
-        run: chmod +x mvnw
+      - name: 3. Dar permisos y listar archivos
+        run: |
+          chmod +x mvnw
+          echo "--- Estructura de archivos actual ---"
+          find . -maxdepth 4 -not -path '*/.*'
 
       - name: 4. Generar Javadoc
-        # Quitamos el || true temporalmente para VER el error real si falla
-        run: ./mvnw -B javadoc:javadoc -Ddoclint:none
+        # Aquí forzamos a que intente compilar primero, a veces ayuda a Javadoc
+        run: ./mvnw clean compile javadoc:javadoc -Ddoclint:none
 
-      - name: 5. Validar y desplegar
+      - name: 5. Verificar si se creó la carpeta
+        run: |
+          if [ -d "target/site/apidocs" ]; then
+            echo "✅ Carpeta encontrada. Contenido:"
+            ls -R target/site/apidocs
+          else
+            echo "❌ ERROR: La carpeta target/site/apidocs NO EXISTE."
+            # Creamos una carpeta vacía con un index para que el deploy no explote
+            mkdir -p target/site/apidocs
+            echo "<html><body><h1>Error: No se generó Javadoc</h1></body></html>" > target/site/apidocs/index.html
+          fi
+
+      - name: 6. Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: target/site/apidocs
