@@ -2,7 +2,7 @@ name: 'Supuesto nº7: CI/CD Encadenado'
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
   workflow_dispatch:
 
 jobs:
