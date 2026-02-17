@@ -18,7 +18,9 @@ import com.example.demo.service.ReviewService;
 
 import tools.jackson.databind.ObjectMapper;
 
-
+/**
+ * Esta es la clase principal de mi aplicación.
+ */
 @Controller
 @RequestMapping("/informes")
 public class InformeController {
