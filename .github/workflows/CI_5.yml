@@ -1,0 +1,36 @@
+# Nombre del flujo
+name: Memoria Inteligente (Caching)
+
+on: push
+
+jobs:
+  build-rapido:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Bajamos el código
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configuración de Java CON CACHÉ
+      # Esta es la parte crítica del ejercicio.
+      - name: Configurar Java 21 con Caché Maven
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          
+          # --- LA CLAVE DEL EJERCICIO ---
+          # Al poner 'maven', le decimos a GitHub:
+          # "Oye, mira el archivo pom.xml. Si no ha cambiado desde la última vez,
+          # no descargues nada de internet; usa lo que guardaste en la carpeta .m2".
+          cache: 'maven'
+
+      # 3. Permisos
+      - name: Dar permisos al wrapper
+        run: chmod +x mvnw
+
+      # 4. Compilación (para probar la velocidad)
+      # La primera vez verás "Downloading...", la segunda vez no.
+      - name: Construir proyecto
+        run: ./mvnw -B package -DskipTests
