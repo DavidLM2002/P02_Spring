@@ -1,0 +1,46 @@
+# Nombre del flujo
+name: Evidencias en caso de Desastre
+
+# --- DISPARADOR ---
+# Se ejecuta en cada push para vigilar que no rompamos nada.
+on: push
+
+jobs:
+  diagnostico-errores:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargar código
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Java
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Permisos
+      - name: Dar permisos al wrapper
+        run: chmod +x mvnw
+
+      # 4. EJECUTAR LOS TESTS
+      # Aquí es donde puede ocurrir el "desastre".
+      # Si los tests fallan, este paso marcará error y el flujo se detendría...
+      # ...pero el siguiente paso está configurado para "rescatar" la información.
+      - name: Ejecutar Tests Unitarios
+        run: ./mvnw -B test
+
+      # 5. EL RECOLECTOR DE EVIDENCIAS (Solo si falla)
+      # Este paso usa la condición especial 'if: failure()'.
+      # Significa: "Solo ejecútame si el paso anterior (los tests) ha fallado".
+      # Si todo sale verde, este paso se salta automáticamente (SKIPPED).
+      - name: Subir Informe de Errores (Surefire Reports)
+        if: failure() 
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-errores-tests # Nombre del archivo .zip que descargarás
+          path: target/surefire-reports/ # Carpeta donde Maven guarda los logs de error
+          retention-days: 1 # (Opcional) Solo guardamos la evidencia 1 día para no ocupar espacio
