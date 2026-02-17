@@ -5,7 +5,8 @@ on:
     branches:
       - main
       - dev-david
-      
+  workflow_dispatch:
+
 permissions:
   contents: write
 
@@ -27,17 +28,15 @@ jobs:
       - name: Dar permisos al wrapper
         run: chmod +x mvnw
 
-      # --- CAMBIO IMPORTANTE AQUÍ ---
-      # 1. -Ddoclint:none -> Ignora errores de sintaxis en los comentarios Javadoc.
-      # 2. -DfailOnError=false -> Intenta generar la web aunque haya fallos.
+      # --- LA SOLUCIÓN ---
+      # Añadimos -Ddoclint:none para que Java ignore errores de formato en comentarios
+      # Añadimos -DfailOnError=false para forzar que termine el proceso
       - name: Generar Javadoc (Modo seguro)
         run: ./mvnw -B javadoc:javadoc -Ddoclint:none -DfailOnError=false
 
-      # --- PASO DE DEPURACIÓN ---
-      # Esto nos mostrará en el log qué hay dentro de la carpeta target.
-      # Si falla, podrás abrir el log de este paso y ver dónde están los archivos.
-      - name: Listar archivos generados (Debug)
-        run: ls -R target/
+      # PASO DE DEPURACIÓN: Nos dirá si la carpeta se creó o no
+      - name: Verificar carpeta generada
+        run: ls -R target/site
 
       - name: Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
