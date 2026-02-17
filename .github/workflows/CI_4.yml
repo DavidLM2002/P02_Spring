@@ -1,0 +1,45 @@
+# Nombre del flujo de trabajo en GitHub
+name: Limpieza y Silencio (Modo Batch)
+
+# --- CONFIGURACIÓN DEL DISPARADOR ---
+# Se activa en cualquier 'push' a cualquier rama.
+# Esto asegura que siempre se compruebe la limpieza, sin importar dónde trabajes.
+on: push
+
+# --- DEFINICIÓN DEL TRABAJO ---
+jobs:
+  test-limpio:
+    # Usamos la última versión de Ubuntu disponible como máquina virtual
+    runs-on: ubuntu-latest
+
+    steps:
+      # PASO 1: Descargar el código
+      # Clona tu repositorio en la máquina virtual para poder trabajar con él.
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # PASO 2: Preparar el entorno Java
+      # Configuramos Java 21 para asegurar compatibilidad.
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin' # Distribución estándar (Eclipse Temurin)
+          cache: 'maven'          # Guarda las dependencias en caché para ir más rápido
+
+      # PASO 3: Permisos
+      # Damos permiso de ejecución al script 'mvnw' (Maven Wrapper).
+      # Sin esto, Linux nos daría un error de "Permission denied".
+      - name: Dar permisos de ejecución al wrapper
+        run: chmod +x mvnw
+
+      # PASO 4: EL OBJETIVO DEL EJERCICIO (Clean + Batch Mode)
+      # Aquí combinamos tres cosas clave:
+      # 1. '-B' (Batch Mode): Le dice a Maven que no hay un humano mirando.
+      #    Esto elimina las barras de carga animadas ([===>   ]) que llenan
+      #    el log de basura y hacen que el archivo de texto sea enorme.
+      # 2. 'clean': Borra la carpeta 'target/' antes de empezar.
+      #    Esto asegura que no estamos usando archivos viejos de una compilación anterior.
+      # 3. 'test': Ejecuta los tests unitarios del proyecto.
+      - name: Ejecutar Tests con Limpieza y sin Ruido (Batch Mode)
+        run: ./mvnw -B clean test
