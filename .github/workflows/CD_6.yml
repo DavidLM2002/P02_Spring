@@ -2,8 +2,11 @@ name: 'Supuesto nº6: Despliegue Remoto por SSH'
 
 on:
   push:
-    branches: [ "*" ] # Normalmente solo desplegamos la rama principal
-  workflow_dispatch:
+    branches: [ "*" ] # Se ejecuta al subir cambios a main
+  workflow_dispatch:     # Permite ejecutarlo manualmente
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -20,31 +23,40 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: 3. Generar el archivo WAR
-        # Esto compila y empaqueta el proyecto. El archivo quedará en la carpeta 'target/'
+      - name: 3. Validar Secretos (Debug)
+        run: |
+          if [ -z "${{ secrets.SSH_KEY }}" ]; then echo "❌ ERROR: SSH_KEY no configurado"; exit 1; fi
+          if [ -z "${{ secrets.REMOTE_HOST }}" ]; then echo "❌ ERROR: REMOTE_HOST no configurado"; exit 1; fi
+          echo "✅ Secretos detectados correctamente."
+
+      - name: 4. Generar el archivo WAR
         run: |
           chmod +x mvnw
           ./mvnw clean package -DskipTests
 
-      - name: 4. Copiar WAR al servidor remoto (SCP)
+      - name: 5. Copiar WAR al servidor remoto (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          # Origen: Busca cualquier archivo .war dentro de la carpeta target
           source: "target/*.war"
-          # Destino: La carpeta donde quieras dejarlo en tu servidor
           target: "/home/${{ secrets.REMOTE_USER }}/despliegues"
-          # 'strip_components: 1' evita que se cree la carpeta 'target/' en el destino
           strip_components: 1
 
-      - name: 5. Notificador de Éxito
-        if: success()
+      - name: 6. Notificador de Estado Final
+        if: always() # Se ejecuta aunque el paso anterior falle para avisarnos
         run: |
           echo "===================================================="
-          echo "🚀 DESPLIEGUE REMOTO COMPLETADO"
+          echo "📢 INFORME DE DESPLIEGUE"
+          echo "===================================================="
+          echo "📅 Fecha: $(date +'%d/%m/%Y %H:%M:%S')"
           echo "👤 Autor: ${{ github.actor }}"
-          echo "📦 Archivo enviado a: ${{ secrets.REMOTE_HOST }}"
+          
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "🚀 Estado: ¡ÉXITO! El archivo se envió a ${{ secrets.REMOTE_HOST }}"
+          else
+            echo "❌ Estado: FALLIDO. Revisa los logs del SCP."
+          fi
           echo "===================================================="
