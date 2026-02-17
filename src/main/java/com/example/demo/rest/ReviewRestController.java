@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping; // <--- No olvides importar esto
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,11 +33,21 @@ public class ReviewRestController {
         return reviewService.findById(id);
     }
 
-
     @PostMapping
     public Review crear(@RequestBody Review review) {
         return reviewService.save(review);
     }
+
+    // --- NUEVO MÉTODO UPDATE (PUT) ---
+    @PutMapping("/{id}")
+    public Review actualizar(@PathVariable Long id, @RequestBody Review review) {
+        // Aseguramos que el objeto review tenga el ID de la URL
+        review.setId(id);
+        
+        // El servicio guarda los cambios sobre ese ID existente
+        return reviewService.save(review);
+    }
+    // ---------------------------------
 
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
