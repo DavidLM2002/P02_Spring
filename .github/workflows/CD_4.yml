@@ -26,19 +26,19 @@ jobs:
         # El "|| true" hace que si falla, no pare el proceso.
         run: ./mvnw -B javadoc:javadoc -Ddoclint:none -DfailOnError=false || true
 
-      - name: 4. Limpiar y Validar Javadoc
-        run: |
-            # 1. Crear la estructura de carpetas por si Maven no lo hizo
-            mkdir -p target/site/apidocs
-            
-            # 2. Si Maven NO generó el index.html, creamos uno de aviso
-            if [ ! -f target/site/apidocs/index.html ]; then
-              echo "<html><body style='font-family:sans-serif; text-align:center; padding-top:50px;'> \
-                    <h1>Generando documentación... ⚙️</h1> \
-                    <p>Maven no encontró clases para documentar o el comando falló.</p> \
-                    <p>Revisa que tu código esté en <b>src/main/java</b>.</p> \
-                    </body></html>" > target/site/apidocs/index.html
-            fi
+      - name: Supuesto 4 - Web (Javadoc Real)
+
+        on:
+          push:
+            branches: [main, feature-dev]
+          workflow_dispatch:
+
+        permissions:
+          contents: write
+
+        jobs:
+          publicar-web:
+            runs-on: ubuntu
 
       - name: 5. Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
