@@ -2,7 +2,7 @@ name: Supuesto 4 - Web (Prueba Definitiva)
 
 on:
   push:
-    branches: ['*'] # Se activa con cualquier rama
+    branches: ['*']
   workflow_dispatch:
 
 permissions:
@@ -21,26 +21,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven' # Añadimos cache para que sea más rápido
 
-      - name: 3. Intentar generar Javadoc
-        # El "|| true" hace que si falla, no pare el proceso.
-        run: ./mvnw -B javadoc:javadoc -Ddoclint:none -DfailOnError=false || true
+      - name: 3. Dar permisos al wrapper
+        run: chmod +x mvnw
 
-      - name: Supuesto 4 - Web (Javadoc Real)
+      - name: 4. Generar Javadoc
+        # Quitamos el || true temporalmente para VER el error real si falla
+        run: ./mvnw -B javadoc:javadoc -Ddoclint:none
 
-        on:
-          push:
-            branches: [main, feature-dev]
-          workflow_dispatch:
-
-        permissions:
-          contents: write
-
-        jobs:
-          publicar-web:
-            runs-on: ubuntu
-
-      - name: 5. Desplegar en GitHub Pages
+      - name: 5. Validar y desplegar
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: target/site/apidocs
