@@ -28,12 +28,17 @@ jobs:
 
       - name: 4. Limpiar y Validar Javadoc
         run: |
-          # Si por algún motivo Maven no generó el index.html,
-          # creamos uno que redirija o avise, pero lo ideal es que 
-          # javadoc:javadoc ya haya llenado la carpeta target/site/apidocs
-          if [ ! -f target/site/apidocs/index.html ]; then
-            echo "<html><body><h1>Generando documentación...</h1><p>Si ves esto, Maven no encontró clases documentadas. Revisa tus comentarios Javadoc.</p></body></html>" > target/site/apidocs/index.html
-          fi
+            # 1. Crear la estructura de carpetas por si Maven no lo hizo
+            mkdir -p target/site/apidocs
+            
+            # 2. Si Maven NO generó el index.html, creamos uno de aviso
+            if [ ! -f target/site/apidocs/index.html ]; then
+              echo "<html><body style='font-family:sans-serif; text-align:center; padding-top:50px;'> \
+                    <h1>Generando documentación... ⚙️</h1> \
+                    <p>Maven no encontró clases para documentar o el comando falló.</p> \
+                    <p>Revisa que tu código esté en <b>src/main/java</b>.</p> \
+                    </body></html>" > target/site/apidocs/index.html
+            fi
 
       - name: 5. Desplegar en GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
