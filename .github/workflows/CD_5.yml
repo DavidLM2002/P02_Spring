@@ -1,0 +1,37 @@
+name: 'Supuesto nº5: Notificador de Estado'
+
+on:
+  push:
+    branches: ['*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  notificador-despliegue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar código
+        uses: actions/checkout@v4
+
+      # --- Pasos de construcción/simulación aquí ---
+      - name: 2. Simular proceso de despliegue
+        run: |
+          echo "Desplegando la aplicación..."
+          sleep 2
+          echo "Despliegue completado con éxito."
+
+      # --- PASO SOLICITADO: NOTIFICADOR ---
+      - name: 3. Notificador de Estado Final
+        if: success() # Solo se ejecuta si los pasos anteriores funcionaron
+        run: |
+          echo "===================================================="
+          echo "📢 INFORME DE DESPLIEGUE"
+          echo "===================================================="
+          echo "📅 Fecha: $(date +'%d/%m/%Y %H:%M:%S')"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo "🚀 Mensaje: ¡El despliegue se ha realizado con éxito!"
+          echo "🌿 Rama: ${{ github.ref_name }}"
+          echo "===================================================="
