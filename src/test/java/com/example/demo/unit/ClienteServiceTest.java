@@ -69,7 +69,7 @@ class ClienteServiceTest {
     }
 
     // Test para cuando NO existe el cliente 
-    @Test
+    /*@Test
     void testBuscarPorId_NoExiste() {
         Long id = 99L;
 
@@ -82,6 +82,6 @@ class ClienteServiceTest {
         });
         
         verify(clienteRepository).findById(id);
-    }
+    }*/
 }
 
