@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - feature-dev  # Lo pongo aquí para que te funcione mientras pruebas
+      - dev-david  # Lo pongo aquí para que te funcione mientras pruebas
 
 # --- PERMISOS ---
 # Necesitamos permiso de escritura para que el robot pueda crear
